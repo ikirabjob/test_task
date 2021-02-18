@@ -2,6 +2,8 @@
 
 namespace App\Console\Commands;
 
+use Carbon\Carbon;
+use Carbon\Traits\Date;
 use GuzzleHttp\Client;
 use GuzzleHttp\Cookie\CookieJar;
 use GuzzleHttp\Exception\RequestException;
@@ -100,8 +102,9 @@ class Amazon extends Command
 
     protected function createCsvColumns(): void
     {
+        $fileName = 'KEYWORDWINNER_'.Carbon::now()->format('Y_m_d');
         $columns = array('Keyword', 'Publisher', 'Article name', 'Publish date', 'Article URL', 'Scraping date', 'no_recommendation');
-        $this->file = fopen(public_path('file.csv'), 'w+');
+        $this->file = fopen(public_path($fileName.'.csv'), 'w+');
         fputcsv($this->file, $columns);
     }
 
@@ -109,9 +112,9 @@ class Amazon extends Command
     {
         if (is_resource($this->file)) {
             if ($result !== null) {
-                fputcsv($this->file, array_merge([$keyword], array_values($result), [0]));
+                fputcsv($this->file, array_merge([$keyword], array_values($result), [Carbon::now()->toDateString(), 0]));
             } else {
-                $result = array_merge([$keyword], ['', '', '', ''], [1]);
+                $result = array_merge([$keyword], ['', '', '', ''], [Carbon::now()->toDateString(), 1]);
                 fputcsv($this->file, $result);
             }
         }
